@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT Security Monitor</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .alert {
+            background: #fff;
+            border-left: 4px solid #ff4444;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .high { border-color: #ff4444; }
+        .medium { border-color: #ffbb33; }
+        .low { border-color: #00C851; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>IoT Network Security Monitor</h1>
+        <div id="alerts"></div>
+    </div>
+    <script>
+        const socket = io();
+        const alertsContainer = document.getElementById('alerts');
+
+        socket.on('threat-alert', (threat) => {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert ${getSeverityClass(threat.score)}`;
+            alertDiv.innerHTML = `
+                <h3>${threat.type}</h3>
+                <p>Severity Score: ${(threat.score * 100).toFixed(1)}%</p>
+                <p>Time: ${new Date().toLocaleTimeString()}</p>
+                <pre>${JSON.stringify(threat.details, null, 2)}</pre>
+            `;
+            alertsContainer.insertBefore(alertDiv, alertsContainer.firstChild);
+        });
+
+        function getSeverityClass(score) {
+            if (score > 0.8) return 'high';
+            if (score > 0.5) return 'medium';
+            return 'low';
+        }
+    </script>
+</body>
+</html>
